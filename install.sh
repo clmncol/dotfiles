@@ -53,12 +53,83 @@ install_package() {
 
 check_deps() {
     info "Checking dependencies..."
-    for dep in git curl bash fzf; do
-        if ! command -v "$dep" >/dev/null 2>&1; then
-            warn "$dep is not installed."
-            install_package "$dep"
+    for dep in git curl bash fzf neovim bat btop ripgrep fd-find make jq gpg; do
+        # Determine the binary name to check against
+        cmd="$dep"
+        if [ "$dep" = "neovim" ]; then cmd="nvim"; fi
+        if [ "$dep" = "ripgrep" ]; then cmd="rg"; fi
+        if [ "$dep" = "fd-find" ]; then
+            if command -v fdfind >/dev/null 2>&1; then cmd="fdfind"; else cmd="fd"; fi
+        fi
+        
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            warn "$cmd is not installed."
+            
+            # Map for package managers
+            pkg="$dep"
+            if [ "$dep" = "fd-find" ] && command -v apt-get >/dev/null 2>&1; then pkg="fd-find"; fi
+            if [ "$dep" = "fd-find" ] && ! command -v apt-get >/dev/null 2>&1; then pkg="fd-find"; fi # Fedora uses fd-find now too. Wait, let's just make sure.
+            if [ "$dep" = "fd-find" ] && command -v dnf >/dev/null 2>&1; then pkg="fd-find"; fi
+            if [ "$dep" = "fd-find" ] && command -v brew >/dev/null 2>&1; then pkg="fd"; fi
+            if [ "$dep" = "fd-find" ] && command -v pacman >/dev/null 2>&1; then pkg="fd"; fi
+            
+            if [ "$dep" = "gpg" ] && command -v apt-get >/dev/null 2>&1; then pkg="gnupg"; fi
+            if [ "$dep" = "gpg" ] && command -v brew >/dev/null 2>&1; then pkg="gnupg"; fi
+            if [ "$dep" = "gpg" ] && command -v dnf >/dev/null 2>&1; then pkg="gnupg2"; fi
+            
+            install_package "$pkg"
         fi
     done
+    
+    # Setup Mise and Dev Tools
+    if ! command -v mise >/dev/null 2>&1; then
+        info "Installing mise (dev tools manager)..."
+        curl https://mise.run | sh || warn "Failed to install mise."
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+    
+    if command -v mise >/dev/null 2>&1; then
+        info "Installing Node.js (npm) and Go via mise..."
+        mise use --global node@lts go@latest || warn "Failed to setup node/go via mise."
+    fi
+    
+    if ! command -v cargo >/dev/null 2>&1; then
+        warn "cargo is not installed."
+        info "Installing Rust toolchain (rustup)..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || warn "Failed to install Rust/cargo."
+        # Attempt to source it so subsequent steps have it if needed
+        if [ -f "$HOME/.cargo/env" ]; then
+            . "$HOME/.cargo/env"
+        fi
+    fi
+    
+    if ! command -v glow >/dev/null 2>&1; then
+        warn "glow is not installed."
+        info "Attempting to install glow via go..."
+        if command -v mise >/dev/null 2>&1; then
+            mise exec -- go install github.com/charmbracelet/glow/v2@latest || warn "Failed to install glow via mise go."
+        elif command -v go >/dev/null 2>&1; then
+            go install github.com/charmbracelet/glow/v2@latest || warn "Failed to install glow via go."
+        else
+            warn "Go is not available. You may need to install glow manually."
+        fi
+    fi
+    
+    if ! command -v ghostty >/dev/null 2>&1; then
+        warn "ghostty is not installed."
+        info "Attempting to install ghostty..."
+        os_name=$(uname -s)
+        if [ "$os_name" = "Darwin" ] && command -v brew >/dev/null 2>&1; then
+            brew install --cask ghostty || warn "Failed to install ghostty via brew."
+        elif command -v dnf >/dev/null 2>&1; then
+            if ! dnf copr enable -y scottames/ghostty >/dev/null 2>&1; then
+                sudo dnf install -y 'dnf-command(copr)' || warn "Failed to install dnf-command(copr)."
+            fi
+            sudo dnf copr enable -y scottames/ghostty && sudo dnf install -y ghostty || warn "Failed to install ghostty via dnf copr."
+        else
+            install_package "ghostty" || warn "Could not install ghostty via package manager."
+        fi
+    fi
     
     if ! command -v starship >/dev/null 2>&1; then
         warn "starship is not installed."
@@ -72,13 +143,11 @@ check_deps() {
 # --- Clone Repository ---
 clone_dotfiles() {
     if [ -d "$DOTFILES_DIR" ]; then
-        warn "Dotfiles directory already exists at $DOTFILES_DIR"
-        info "Updating existing repository..."
-        git -C "$DOTFILES_DIR" pull --rebase origin main || fatal "Failed to update dotfiles."
-    else
-        info "Cloning dotfiles to $DOTFILES_DIR..."
-        git clone "$REPO_URL" "$DOTFILES_DIR" || fatal "Failed to clone dotfiles."
+        warn "Dotfiles directory already exists at $DOTFILES_DIR. Removing for a fresh install..."
+        rm -rf "$DOTFILES_DIR"
     fi
+    info "Cloning dotfiles to $DOTFILES_DIR..."
+    git clone "$REPO_URL" "$DOTFILES_DIR" || fatal "Failed to clone dotfiles."
     success "Repository ready."
 }
 
@@ -118,9 +187,18 @@ setup_symlinks() {
     link_file "$DOTFILES_DIR/ghostty.config" "${HOME}/.config/ghostty/config" "$backup_dir"
     link_file "$DOTFILES_DIR/nvim" "${HOME}/.config/nvim" "$backup_dir"
     
-    # VS Code setup
+    # VS Code setup and macOS Bash Profile setup
     os_name=$(uname -s)
     if [ "$os_name" = "Darwin" ]; then
+        # On macOS, login shells use .bash_profile, not .bashrc by default
+        if [ -f "${HOME}/.bash_profile" ] && ! grep -q "source ~/.bashrc" "${HOME}/.bash_profile" 2>/dev/null; then
+             echo -e "\n[ -r ~/.bashrc ] && source ~/.bashrc" >> "${HOME}/.bash_profile"
+             success "Added .bashrc source to .bash_profile for macOS"
+        elif [ ! -f "${HOME}/.bash_profile" ]; then
+             echo "[ -r ~/.bashrc ] && source ~/.bashrc" > "${HOME}/.bash_profile"
+             success "Created .bash_profile to source .bashrc for macOS"
+        fi
+        
         vscode_dir="${HOME}/Library/Application Support/Code/User"
     else
         vscode_dir="${HOME}/.config/Code/User"
