@@ -1,0 +1,7 @@
+# swap / temp
+*.swp
+*.swo
+*~
+
+# logs
+*.log
