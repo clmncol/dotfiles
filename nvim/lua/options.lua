@@ -12,15 +12,3 @@ vim.opt.smartindent = true
 vim.opt.updatetime = 250
 vim.opt.signcolumn = "yes"
 
-vim.filetype.add({
-	extension = {
-		journal = "ledger",
-		hledger = "ledger",
-		ledger = "ledger",
-		zsh = "sh", -- lets bashls attach for basic shell support
-	},
-	filename = {
-		["main.journal"] = "ledger",
-		["hledger.journal"] = "ledger",
-	},
-})
