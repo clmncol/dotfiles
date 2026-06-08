@@ -11,4 +11,3 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.updatetime = 250
 vim.opt.signcolumn = "yes"
-

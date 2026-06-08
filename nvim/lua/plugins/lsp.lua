@@ -55,6 +55,7 @@ return {
 					"yamlls",
 					"marksman",
 					"rust_analyzer",
+					"harper_ls",
 				},
 				automatic_enable = true,
 			})
@@ -80,6 +81,9 @@ return {
 				vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
 				vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
 				vim.keymap.set("n", "<leader>dd", vim.diagnostic.open_float, opts)
+				vim.keymap.set("n", "<leader>dc", function()
+					vim.diagnostic.open_float({ scope = "cursor" })
+				end, opts)
 				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
 				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
 				vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, opts)
@@ -127,6 +131,23 @@ return {
 						validate = true,
 						completion = true,
 						hover = true,
+					},
+				},
+			})
+
+			vim.lsp.config("harper_ls", {
+				capabilities = capabilities,
+				settings = {
+					["harper-ls"] = {
+						markdown = {
+							IgnoreLinkTitle = false,
+						},
+						linters = {
+							SpellCheck = true,
+							WrongApostrophe = false,
+							LongSentences = true,
+							RepeatedWords = true,
+						},
 					},
 				},
 			})
