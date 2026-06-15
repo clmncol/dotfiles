@@ -192,6 +192,7 @@ setup_symlinks() {
     
     # Standard tools
     link_file "$DOTFILES_DIR/bashrc" "${HOME}/.bashrc" "$backup_dir"
+    link_file "$DOTFILES_DIR/zshrc" "${HOME}/.zshrc" "$backup_dir"
     link_file "$DOTFILES_DIR/starship.toml" "${HOME}/.config/starship.toml" "$backup_dir"
     link_file "$DOTFILES_DIR/ghostty.config" "${HOME}/.config/ghostty/config" "$backup_dir"
     link_file "$DOTFILES_DIR/nvim" "${HOME}/.config/nvim" "$backup_dir"
@@ -237,6 +238,7 @@ uninstall() {
     info "Uninstalling dotfiles..."
     
     remove_link "${HOME}/.bashrc"
+    remove_link "${HOME}/.zshrc"
     remove_link "${HOME}/.config/starship.toml"
     remove_link "${HOME}/.config/ghostty/config"
     remove_link "${HOME}/.config/nvim"
@@ -291,7 +293,7 @@ main() {
 
     info "Post-install action required:"
     step "For all changes to take effect, please log out and log back in."
-    step "Alternatively, restart your terminal or run: source ~/.bashrc"
+    step "Alternatively, restart your terminal or run: source ~/.bashrc (or source ~/.zshrc if using zsh)"
 }
 
 main "$@"
