@@ -16,6 +16,9 @@ vim.keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", { desc = "Help
 vim.keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", { desc = "File symbols" })
 vim.keymap.set("n", "<leader>fd", function() require("conform").format({ async = true, lsp_fallback = true }) end, { desc = "Format buffer" })
+
+vim.keymap.set("n", "<leader>fm", function() require("reference_markdown").show() end, { desc = "Markdown reference" })
+vim.keymap.set("n", "<leader>fk", function() require("reference_keymaps").show() end, { desc = "Keymaps reference" })
 --- Code Nav
 -- Cycle open files on top bar
 vim.keymap.set("n", "<S-h>", "<cmd>BufferLineCyclePrev<cr>", { desc = "Prev buffer" })
