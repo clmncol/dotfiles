@@ -75,5 +75,14 @@ alias vi=nvim
 alias vim=nvim
 set -o vi
 
+# fzf cd into GitHub folder
+g() {
+  local dir
+  dir=$(find ~/GitHub -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|.*/||' | fzf)
+  if [ -n "$dir" ]; then
+    cd "$HOME/GitHub/$dir"
+  fi
+}
+
 # opencode
 export PATH="$HOME/.opencode/bin:$PATH"
