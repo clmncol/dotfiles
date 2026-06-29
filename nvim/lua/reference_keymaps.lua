@@ -7,6 +7,14 @@ M.show = function()
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
 
+  local function pad_right(str, target_width)
+    local width = vim.fn.strdisplaywidth(str)
+    if width >= target_width then
+      return str
+    end
+    return str .. string.rep(" ", target_width - width)
+  end
+
   -- Curated list of actions we want to display
   local curated_keymaps = {
     -- Find & Search
@@ -59,7 +67,7 @@ M.show = function()
     { category = "Git", desc = "Reset hunk" },
     { category = "Git", desc = "Preview hunk" },
     { category = "Git", desc = "Toggle blame" },
-    { category = "Git", desc = "Diff this file" },
+    { category = "Git", desc = "Diff this" },
   }
 
   -- Build keymap lookup index
@@ -68,28 +76,44 @@ M.show = function()
     for _, map in ipairs(maps) do
       if map.desc and map.desc ~= "" then
         -- Index mapping by its lowercase description for robust lookup
-        lookup[map.desc:lower()] = map.lhs
+        local desc = map.desc:lower()
+        if not lookup[desc] then
+          lookup[desc] = {}
+        end
+        -- Normalize the key sequence representation for duplicate detection (lowercase)
+        local norm_lhs = map.lhs:lower()
+        lookup[desc][norm_lhs] = map.lhs
       end
     end
   end
 
   -- Scan normal mode global and buffer-local mappings
   parse_maps(vim.api.nvim_get_keymap("n"))
-  parse_maps(vim.api.nvim_buf_get_keymap(0, "n"))
-
-  -- Scan insert mode mappings (e.g. for Signature Help)
   parse_maps(vim.api.nvim_get_keymap("i"))
-  parse_maps(vim.api.nvim_buf_get_keymap(0, "i"))
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) then
+      parse_maps(vim.api.nvim_buf_get_keymap(buf, "n"))
+      parse_maps(vim.api.nvim_buf_get_keymap(buf, "i"))
+    end
+  end
 
   -- Resolve dynamic shortcuts
   local results = {}
   for _, item in ipairs(curated_keymaps) do
-    local keys = lookup[item.desc:lower()]
-    if keys then
+    local keys_set = lookup[item.desc:lower()]
+    if keys_set and next(keys_set) then
+      local keys_list = {}
+      for _, lhs in pairs(keys_set) do
+        table.insert(keys_list, lhs)
+      end
+      -- Sort so they always display in a stable order
+      table.sort(keys_list)
+      local keys_str = table.concat(keys_list, ", ")
+
       table.insert(results, {
         category = item.category,
         name = item.desc,
-        keys = keys,
+        keys = keys_str,
         unbound = false,
       })
     else
@@ -103,8 +127,8 @@ M.show = function()
   end
 
   local make_display = function(entry)
-    local category_part = string.format("%-8s", entry.category)
-    local keys_part = string.format(" %-12s ", entry.keys)
+    local category_part = pad_right(entry.category, 8)
+    local keys_part = " " .. pad_right(entry.keys, 16) .. " "
     local name_part = entry.name
 
     local part1 = category_part .. " │"
@@ -148,7 +172,12 @@ M.show = function()
         if selection.unbound then
           vim.notify("Command '" .. selection.name .. "' is not currently bound.", vim.log.levels.WARN)
         else
-          local keys = vim.api.nvim_replace_termcodes(selection.value, true, true, true)
+          local value = selection.value
+          local comma_idx = string.find(value, ",")
+          if comma_idx then
+            value = string.sub(value, 1, comma_idx - 1)
+          end
+          local keys = vim.api.nvim_replace_termcodes(value, true, true, true)
           vim.api.nvim_feedkeys(keys, "m", true)
         end
       end)

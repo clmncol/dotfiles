@@ -82,13 +82,11 @@ return {
 				vim.keymap.set("n", "gr", vim.lsp.buf.references, extend("Go to references"))
 				vim.keymap.set("n", "K", vim.lsp.buf.hover, extend("LSP Hover / Docs"))
 				vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, extend("Rename symbol"))
-				vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, extend("Code action"))
+				vim.keymap.set("n", "<leader>a", vim.lsp.buf.code_action, extend("Code action"))
 				vim.keymap.set("n", "<leader>dd", vim.diagnostic.open_float, extend("Line diagnostic"))
 				vim.keymap.set("n", "<leader>dc", function()
 					vim.diagnostic.open_float({ scope = "cursor" })
 				end, extend("Cursor diagnostic"))
-				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, extend("Prev diagnostic"))
-				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, extend("Next diagnostic"))
 				vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, extend("Signature help"))
 			end
 

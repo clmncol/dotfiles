@@ -6,6 +6,8 @@ vim.diagnostic.config({
   update_in_insert = false,
   severity_sort = true,
 })
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
 
 -- Telescope
 -- Telescope project searches
@@ -21,8 +23,8 @@ vim.keymap.set("n", "<leader>fm", function() require("reference_markdown").show(
 vim.keymap.set("n", "<leader>fk", function() require("reference_keymaps").show() end, { desc = "Keymaps reference" })
 --- Code Nav
 -- Cycle open files on top bar
-vim.keymap.set("n", "<S-h>", "<cmd>BufferLineCyclePrev<cr>", { desc = "Prev buffer" })
-vim.keymap.set("n", "<S-l>", "<cmd>BufferLineCycleNext<cr>", { desc = "Next buffer" })
+vim.keymap.set("n", "<Tab>", "<cmd>BufferLineCycleNext<cr>", { desc = "Next buffer" })
+vim.keymap.set("n", "<S-Tab>", "<cmd>BufferLineCyclePrev<cr>", { desc = "Prev buffer" })
 
 -- Jump between active split panes
 vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Go to left window" })
