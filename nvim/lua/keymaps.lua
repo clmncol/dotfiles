@@ -21,6 +21,27 @@ vim.keymap.set("n", "<leader>fd", function() require("conform").format({ async =
 
 vim.keymap.set("n", "<leader>fm", function() require("reference_markdown").show() end, { desc = "Markdown reference" })
 vim.keymap.set("n", "<leader>fk", function() require("reference_keymaps").show() end, { desc = "Keymaps reference" })
+
+-- Folds
+vim.keymap.set("n", "za", "za", { desc = "Toggle fold" })
+vim.keymap.set("n", "zo", "zo", { desc = "Open fold" })
+vim.keymap.set("n", "zc", "zc", { desc = "Close fold" })
+vim.keymap.set("n", "zM", "zM", { desc = "Close all folds" })
+vim.keymap.set("n", "zR", "zR", { desc = "Open all folds" })
+
+-- Tabs (independent workspaces with their own splits)
+vim.keymap.set("n", "<leader>tt", "<cmd>tabnew<cr>", { desc = "New tab" })
+vim.keymap.set("n", "<leader>tc", "<cmd>tabclose<cr>", { desc = "Close tab" })
+vim.keymap.set("n", "gt",         "gt",               { desc = "Next tab" })
+vim.keymap.set("n", "gT",         "gT",               { desc = "Prev tab" })
+vim.keymap.set("n", "<leader>tn", "gt",               { desc = "Next tab" })
+vim.keymap.set("n", "<leader>tp", "gT",               { desc = "Prev tab" })
+
+-- Buffers
+vim.keymap.set("n", "<leader>bc", "<cmd>bdelete<cr>", { desc = "Close buffer" })
+vim.keymap.set("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set("n", "<leader>bp", "<cmd>bprev<cr>", { desc = "Prev buffer" })
+vim.keymap.set("n", "<leader>ba", "<cmd>bufdo bdelete<cr>", { desc = "Close all buffers" })
 --- Code Nav
 -- Cycle open files on top bar
 vim.keymap.set("n", "<Tab>", "<cmd>BufferLineCycleNext<cr>", { desc = "Next buffer" })

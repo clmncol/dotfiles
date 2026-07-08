@@ -4,6 +4,8 @@ vim.filetype.add({
     gotmpl = "gotmpl",
     tmpl = "gotmpl",
     tpl = "gotmpl",
+    journal = "hledger",
+    hledger = "hledger",
   },
   filename = {
     [".gitlab-ci.yml"] = "yaml.gitlab",

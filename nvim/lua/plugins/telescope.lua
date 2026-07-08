@@ -17,6 +17,14 @@ return {
           file_ignore_patterns = {
             "%.git/"
           },
+          mappings = {
+            i = {
+              ["<C-h>"] = actions.select_horizontal,
+            },
+            n = {
+              ["<C-h>"] = actions.select_horizontal,
+            },
+          },
         },
         pickers = {
           find_files = {

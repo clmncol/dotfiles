@@ -66,6 +66,20 @@ return {
 		"b0o/schemastore.nvim",
 	},
 	{
+		"ray-x/lsp_signature.nvim",
+		event = "InsertEnter",
+		opts = {
+			bind = true,
+			floating_window = true,
+			hint_enable = false,
+			handler_opts = {
+				border = "rounded",
+			},
+			toggle_key = "<C-k>",
+			toggle_key_flip_floatwin_setting = true,
+		},
+	},
+	{
 		"neovim/nvim-lspconfig",
 		dependencies = { "hrsh7th/cmp-nvim-lsp", "b0o/schemastore.nvim" },
 		config = function()
@@ -87,8 +101,7 @@ return {
 				vim.keymap.set("n", "<leader>dc", function()
 					vim.diagnostic.open_float({ scope = "cursor" })
 				end, extend("Cursor diagnostic"))
-				vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, extend("Signature help"))
-			end
+				end
 
 			vim.api.nvim_create_autocmd("LspAttach", {
 				callback = function(args)

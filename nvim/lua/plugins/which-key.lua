@@ -11,7 +11,7 @@ return {
 				{ "<leader>d", group = "diagnostics" },
 				{ "<leader>f", group = "find/format" },
 				{ "<leader>g", group = "git" },
-				{ "<leader>h", group = "hledger" },
+				{ "<leader>H", group = "hledger" },
 				{ "<leader>l", group = "ledger" },
 				{ "<leader>r", group = "rename" },
 			})

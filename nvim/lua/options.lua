@@ -11,3 +11,9 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.updatetime = 250
 vim.opt.signcolumn = "yes"
+
+-- Folding (treesitter-based)
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldlevel = 99    -- start with all folds open
+vim.opt.foldenable = true
