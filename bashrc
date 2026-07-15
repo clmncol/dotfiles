@@ -87,3 +87,4 @@ g() {
 alias gg="cd $HOME/GitHub"
 # opencode
 export PATH="$HOME/.opencode/bin:$PATH"
+export EDITOR=nvim
