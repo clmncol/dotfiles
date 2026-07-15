@@ -143,7 +143,7 @@ check_deps() {
     if ! command -v starship >/dev/null 2>&1; then
         warn "starship is not installed."
         step "Installing starship..."
-        curl -sS https://starship.rs/install.sh | sh -s -- -y -q >> "$LOG_FILE" 2>&1 || fatal "Failed to install starship."
+        curl -sS https://starship.rs/install.sh | sh -s -- -y >> "$LOG_FILE" 2>&1 || fatal "Failed to install starship."
     fi
     
     success "All dependencies met."
