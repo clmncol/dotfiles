@@ -12,7 +12,8 @@ return {
 					bash = { "shfmt" },
 					zsh = { "shfmt" },
 					json = { "jq" },
-					yaml = { "yamlfmt" },
+					toml = { "taplo" },
+				yaml = { "yamlfmt" },
 					markdown = { "prettier" },
 				},
 				-- format_on_save = {
