@@ -303,6 +303,64 @@ setup_symlinks() {
     done
 }
 
+# --- GPG Agent ---
+# Git is configured to commit-sign with GPG. Over SSH the agent must use a
+# terminal pinentry: /usr/bin/pinentry auto-selects pinentry-gnome3 whenever the
+# agent's environment carries DISPLAY/WAYLAND_DISPLAY (inherited from a desktop
+# session), so the passphrase dialog is drawn on the physical monitor and the
+# remote commit hangs. Pinning a curses/tty pinentry keeps prompts in the tty.
+setup_gpg_agent() {
+    info "Configuring gpg-agent to prompt in the terminal..."
+
+    if ! command -v gpg >/dev/null 2>&1; then
+        warn "gpg is not installed; skipping gpg-agent setup."
+        return 0
+    fi
+
+    gpg_home="${GNUPGHOME:-$HOME/.gnupg}"
+    mkdir -p "$gpg_home"
+    chmod 700 "$gpg_home"
+
+    # Find a terminal-only pinentry (never the /usr/bin/pinentry wrapper, which
+    # may prefer a GUI pinentry). Include common Homebrew paths for macOS.
+    pinentry_bin=""
+    for candidate in \
+        "$(command -v pinentry-curses 2>/dev/null || true)" \
+        /usr/bin/pinentry-curses \
+        /usr/local/bin/pinentry-curses \
+        /opt/homebrew/bin/pinentry-curses \
+        "$(command -v pinentry-tty 2>/dev/null || true)" \
+        /usr/bin/pinentry-tty; do
+        if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+            pinentry_bin="$candidate"
+            break
+        fi
+    done
+
+    if [ -z "$pinentry_bin" ]; then
+        warn "No terminal pinentry (pinentry-curses/tty) found; leaving gpg-agent unset."
+        return 0
+    fi
+
+    conf="$gpg_home/gpg-agent.conf"
+    if [ -f "$conf" ] && grep -q '^[[:space:]]*pinentry-program' "$conf"; then
+        step "gpg-agent.conf already sets pinentry-program (leaving as-is)."
+    elif [ -f "$conf" ]; then
+        printf '\npinentry-program %s\n' "$pinentry_bin" >> "$conf"
+        step "Added pinentry-program to $conf"
+    else
+        printf '# Use a terminal pinentry so passphrase prompts work over SSH.\npinentry-program %s\n' "$pinentry_bin" > "$conf"
+        step "Created $conf with pinentry-program"
+    fi
+    chmod 600 "$conf"
+
+    # Restart the agent so the new configuration takes effect immediately.
+    if command -v gpgconf >/dev/null 2>&1; then
+        gpgconf --kill gpg-agent >> "$LOG_FILE" 2>&1 || true
+    fi
+    success "gpg-agent configured for terminal passphrase prompts."
+}
+
 # --- Uninstall ---
 remove_link() {
     dest="$1"
@@ -356,6 +414,7 @@ main() {
     check_deps
     clone_dotfiles
     setup_symlinks
+    setup_gpg_agent
     
     success "Installation complete! 🎉"
     step "A detailed log has been saved to: $LOG_FILE"
