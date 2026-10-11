@@ -55,6 +55,7 @@ return {
 					"yamlls",
 					"marksman",
 					"rust_analyzer",
+					"ts_ls",
 					"harper_ls",
 				},
 				automatic_enable = true,
