@@ -36,10 +36,6 @@ if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate bash)"
 fi
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:$HOME/.lmstudio/bin"
-# End of LM Studio CLI section
-
 export TERM=xterm
 if [ -f "$HOME/.cargo/env" ]; then
     . "$HOME/.cargo/env"
@@ -53,7 +49,7 @@ if [ -f /etc/bash_completion ]; then
 fi
 
 # fzf history search (Ctrl+R) as a lightweight alternative to ble.sh inline completions
-export FZF_DEFAULT_OPTS="--bind 'ctrl-j:down,ctrl-k:up,j:down,k:up'"
+export FZF_DEFAULT_OPTS="--bind 'ctrl-j:down,ctrl-k:up'"
 if command -v fzf >/dev/null 2>&1; then
   eval "$(fzf --bash 2>/dev/null || true)"
   # Fallback for older fzf versions
@@ -85,6 +81,11 @@ g() {
 }
 
 alias gg="cd $HOME/GitHub"
-# opencode
-export PATH="$HOME/.opencode/bin:$PATH"
+alias d="cd $HOME/Documents"
+alias c="cd $HOME/Documents/scratchpad && cmd"
 export EDITOR=nvim
+
+export CMD_ZDR=1
+
+# Added by the Hunk installer (https://hunk.dev)
+export PATH='/home/grant/.hunk/bin':"$PATH"
