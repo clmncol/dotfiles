@@ -42,6 +42,43 @@ error() {
 fatal() { error "$*"; exit 1; }
 
 # --- Dependencies ---
+LOCAL_BIN_DIR="$HOME/.local/bin"
+ensure_eget() {
+    if command -v eget >/dev/null 2>&1; then
+        return 0
+    fi
+    if [ -x "$LOCAL_BIN_DIR/eget" ]; then
+        export PATH="$LOCAL_BIN_DIR:$PATH"
+        return 0
+    fi
+    warn "eget is not installed."
+    step "Installing eget..."
+    mkdir -p "$LOCAL_BIN_DIR"
+    # Bootstrap eget from its GitHub releases (single static binary).
+    if [ "$(uname -m)" = "x86_64" ]; then
+        eget_asset="eget-linux-amd64.tar.gz"
+    elif [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ]; then
+        eget_asset="eget-linux-arm64.tar.gz"
+    elif [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "x86_64" ]; then
+        eget_asset="eget-darwin-amd64.tar.gz"
+    elif [ "$(uname -s)" = "Darwin" ]; then
+        eget_asset="eget-darwin-arm64.tar.gz"
+    else
+        warn "Unsupported architecture for eget bootstrap: $(uname -m). Skipping eget install."
+        return 1
+    fi
+    local tmpdir
+    tmpdir="$(mktemp -d)"
+    curl -fsSL -o "$tmpdir/eget.tar.gz" "https://github.com/zyedidia/eget/releases/latest/download/$eget_asset" >> "$LOG_FILE" 2>&1 \
+        || { warn "Failed to download eget. Skipping."; return 1; }
+    tar -xzf "$tmpdir/eget.tar.gz" -C "$tmpdir" >> "$LOG_FILE" 2>&1
+    install -m 0755 "$tmpdir/eget" "$LOCAL_BIN_DIR/eget" >> "$LOG_FILE" 2>&1 \
+        || { warn "Failed to install eget binary."; return 1; }
+    rm -rf "$tmpdir"
+    export PATH="$LOCAL_BIN_DIR:$PATH"
+    success "eget installed to $LOCAL_BIN_DIR"
+}
+
 install_package() {
     package=$1
     step "Installing $package..."
@@ -62,10 +99,53 @@ install_package() {
 
 check_deps() {
     info "Checking dependencies..."
+    # Ensure ~/.local/bin is on PATH for this script (used for eget/nvim installs).
+    case ":$PATH:" in
+        *":$LOCAL_BIN_DIR:"*) ;;
+        *) export PATH="$LOCAL_BIN_DIR:$PATH" ;;
+    esac
     for dep in git curl bash fzf neovim bat btop ripgrep fd-find make jq gpg; do
+        # Neovim: install from latest GitHub release via eget instead of the distro
+        # package (distributions like Alma 10 only ship 0.10; we want >=0.12).
+        if [ "$dep" = "neovim" ]; then
+            if command -v nvim >/dev/null 2>&1; then
+                continue
+            fi
+            warn "nvim is not installed."
+            step "Installing neovim via eget from latest GitHub release..."
+            # Remove distro neovim so /usr/bin/nvim doesn't shadow the new binary.
+            if command -v dnf >/dev/null 2>&1 && rpm -q neovim >/dev/null 2>&1; then
+                sudo dnf remove -y -q neovim >> "$LOG_FILE" 2>&1 || warn "Could not remove distro neovim (non-fatal)."
+            fi
+            if ensure_eget; then
+                mkdir -p "$LOCAL_BIN_DIR"
+                # Select the right nvim release asset and target path for this platform.
+                os_kernel="$(uname -s)"
+                machine="$(uname -m)"
+                if [ "$os_kernel" = "Linux" ] && [ "$machine" = "x86_64" ]; then
+                    nvim_asset="nvim-linux-x86_64.tar.gz"; nvim_file="nvim-linux-x86_64/bin/nvim"
+                elif [ "$os_kernel" = "Linux" ] && { [ "$machine" = "aarch64" ] || [ "$machine" = "arm64" ]; }; then
+                    nvim_asset="nvim-linux-arm64.tar.gz"; nvim_file="nvim-linux-arm64/bin/nvim"
+                elif [ "$os_kernel" = "Darwin" ] && [ "$machine" = "arm64" ]; then
+                    nvim_asset="nvim-macos-arm64.tar.gz"; nvim_file="nvim-macos-arm64/bin/nvim"
+                elif [ "$os_kernel" = "Darwin" ] && [ "$machine" = "x86_64" ]; then
+                    nvim_asset="nvim-macos-x86_64.tar.gz"; nvim_file="nvim-macos-x86_64/bin/nvim"
+                else
+                    warn "Unsupported platform for eget neovim install ($os_kernel/$machine). Falling back to package manager."
+                    install_package "neovim"
+                    continue
+                fi
+                eget neovim/neovim --to "$LOCAL_BIN_DIR" --file "$nvim_file" --asset "$nvim_asset" --upgrade-only --quiet >> "$LOG_FILE" 2>&1 \
+                    || fatal "Failed to install neovim via eget."
+            else
+                warn "eget unavailable; falling back to package manager for neovim."
+                install_package "neovim"
+            fi
+            continue
+        fi
+
         # Determine the binary name to check against
         cmd="$dep"
-        if [ "$dep" = "neovim" ]; then cmd="nvim"; fi
         if [ "$dep" = "ripgrep" ]; then cmd="rg"; fi
         if [ "$dep" = "fd-find" ]; then
             if command -v fdfind >/dev/null 2>&1; then cmd="fdfind"; else cmd="fd"; fi
