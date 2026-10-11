@@ -98,10 +98,10 @@ return {
 				vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, extend("Rename symbol"))
 				vim.keymap.set("n", "<leader>a", vim.lsp.buf.code_action, extend("Code action"))
 				vim.keymap.set("n", "<leader>dd", vim.diagnostic.open_float, extend("Line diagnostic"))
-				vim.keymap.set("n", "<leader>dc", function()
+				vim.keymap.set("n", "<leader>dC", function()
 					vim.diagnostic.open_float({ scope = "cursor" })
 				end, extend("Cursor diagnostic"))
-				end
+			end
 
 			vim.api.nvim_create_autocmd("LspAttach", {
 				callback = function(args)
