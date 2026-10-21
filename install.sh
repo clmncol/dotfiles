@@ -104,7 +104,7 @@ check_deps() {
         *":$LOCAL_BIN_DIR:"*) ;;
         *) export PATH="$LOCAL_BIN_DIR:$PATH" ;;
     esac
-    for dep in git curl bash fzf neovim bat btop ripgrep fd-find make jq gpg; do
+    for dep in git curl bash fzf neovim bat btop ripgrep fd-find make jq gpg tmux; do
         # Neovim: install from latest GitHub release via eget instead of the distro
         # package (distributions like Alma 10 only ship 0.10; we want >=0.12).
         if [ "$dep" = "neovim" ]; then
@@ -275,6 +275,7 @@ setup_symlinks() {
     link_file "$DOTFILES_DIR/zshrc" "${HOME}/.zshrc" "$backup_dir"
     link_file "$DOTFILES_DIR/starship.toml" "${HOME}/.config/starship.toml" "$backup_dir"
     link_file "$DOTFILES_DIR/ghostty.config" "${HOME}/.config/ghostty/config" "$backup_dir"
+    link_file "$DOTFILES_DIR/tmux.conf" "${HOME}/.tmux.conf" "$backup_dir"
     link_file "$DOTFILES_DIR/nvim" "${HOME}/.config/nvim" "$backup_dir"
     
     # VS Code setup and macOS Bash Profile setup
@@ -379,6 +380,7 @@ uninstall() {
     remove_link "${HOME}/.zshrc"
     remove_link "${HOME}/.config/starship.toml"
     remove_link "${HOME}/.config/ghostty/config"
+    remove_link "${HOME}/.tmux.conf"
     remove_link "${HOME}/.config/nvim"
     
     os_name=$(uname -s)
@@ -423,6 +425,7 @@ main() {
     step "Mise (Dev tools):  https://mise.jdx.dev/"
     step "Starship (Prompt): https://starship.rs/"
     step "Ghostty (Term):    https://ghostty.org/"
+    step "tmux (Multiplexer): https://github.com/tmux/tmux"
     step "Glow (Markdown):   https://github.com/charmbracelet/glow"
     step "Neovim (Editor):   https://neovim.io/"
 

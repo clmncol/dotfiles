@@ -89,3 +89,14 @@ export CMD_ZDR=1
 
 # Added by the Hunk installer (https://hunk.dev)
 export PATH='/home/grant/.hunk/bin':"$PATH"
+
+# Auto-attach to tmux 
+if command -v tmux &> /dev/null \
+   && [[ $- == *i* ]] \
+   && [[ -z "$TMUX" ]] \
+   && [[ -n "$PS1" ]] \
+   && [[ ! "$TERM" =~ ^(screen|tmux|linux) ]]; then
+
+    # Attach to 'main' if it exists, otherwise create it
+    tmux new-session -A -s main
+fi
