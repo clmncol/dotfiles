@@ -83,6 +83,7 @@ g() {
 alias gg="cd $HOME/GitHub"
 alias d="cd $HOME/Documents"
 alias c="cd $HOME/Documents/scratchpad && cmd"
+alias cc="cd $HOME/Documents/scratchpad/"
 export EDITOR=nvim
 
 export CMD_ZDR=1
