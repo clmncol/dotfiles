@@ -14,7 +14,13 @@ return {
 					json = { "jq" },
 					toml = { "taplo" },
 				yaml = { "yamlfmt" },
-					markdown = { "prettier" },
+					markdown = { "prettier_markdown" },
+				},
+				formatters = {
+					prettier_markdown = {
+						command = "prettier",
+						args = { "--stdin-filepath", "$FILENAME", "--prose-wrap", "always", "--print-width", "100" },
+					},
 				},
 				-- format_on_save = {
 				--	timeout_ms = 500,
