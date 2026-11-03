@@ -24,6 +24,8 @@ M.show = function()
 		-- find  (<leader>f)
 		{ category = "find", desc = "Find files" },
 		{ category = "find", desc = "Live grep" },
+		{ category = "find", desc = "Replace in file" },
+		{ category = "find", desc = "Replace in project" },
 		{ category = "find", desc = "Recent files" },
 		{ category = "find", desc = "Buffers" },
 		{ category = "find", desc = "File symbols" },

@@ -14,7 +14,7 @@ vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fin
 vim.keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { desc = "Live grep" })
 vim.keymap.set("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", { desc = "Help tags" })
-vim.keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Recent files" })
+vim.keymap.set("n", "<leader>fo", "<cmd>Telescope oldfiles<cr>", { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", { desc = "File symbols" })
 vim.keymap.set("n", "<leader>fd", function() require("conform").format({ async = true, lsp_fallback = true }) end, { desc = "Format buffer" })
 

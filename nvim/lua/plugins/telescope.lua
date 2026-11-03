@@ -30,6 +30,9 @@ return {
           find_files = {
             hidden = true,
           },
+          live_grep = {
+            additional_args = { "--hidden" },
+          },
           buffers = {
             sort_mru = true,
             ignore_current_buffer = false,
